@@ -9,20 +9,33 @@ import {
   Chip,
   useTheme,
   alpha,
-  Stack
+  Tooltip,
+  LinearProgress
 } from '@mui/material';
 import {
   School,
   Notifications,
   Settings,
   Person,
-  EmojiEvents,
-  LocalFireDepartment
+  LocalFireDepartment,
+  ExitToApp,
+  Star
 } from '@mui/icons-material';
 import ThemeToggle from './ThemeToggle';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const theme = useTheme();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  // Dane użytkownika z wartościami domyślnymi
+  const currentLevel = 12;
+  const currentXP = 1247;
+  const nextLevelXP = 1500;
+  const streakDays = 7;
+  const xpProgress = (currentXP / nextLevelXP) * 100;
 
   return (
     <AppBar 
@@ -36,9 +49,10 @@ const Header = () => {
         boxShadow: theme.palette.mode === 'dark' 
           ? '0 4px 20px rgba(0, 0, 0, 0.3)' 
           : '0 4px 20px rgba(0, 0, 0, 0.08)',
+        zIndex: 1300 // Wyższy z-index niż navigation
       }}
     >
-      <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
+      <Toolbar sx={{ justifyContent: 'space-between', py: 1, minHeight: '64px !important' }}>
         {/* Logo i Nazwa */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Box
@@ -53,13 +67,13 @@ const Header = () => {
           >
             <School 
               sx={{ 
-                fontSize: 32, 
+                fontSize: 28, 
                 color: theme.palette.primary.main,
                 filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
               }} 
             />
             <Typography 
-              variant="h5" 
+              variant="h6" 
               component="div" 
               sx={{ 
                 fontWeight: 800,
@@ -69,19 +83,20 @@ const Header = () => {
                 letterSpacing: '-0.02em'
               }}
             >
-              LinguaLearn
+              KappaLingo
             </Typography>
           </Box>
 
-          {/* Streak Counter */}
+          {/* Minimalistyczny Streak Counter */}
           <Chip
-            icon={<LocalFireDepartment sx={{ color: '#ff6b35 !important' }} />}
-            label="7 dni"
+            icon={<LocalFireDepartment sx={{ color: '#ff6b35 !important', fontSize: 18 }} />}
+            label={`${streakDays} dni`}
             size="small"
             sx={{
-              backgroundColor: alpha('#ff6b35', 0.1),
+              backgroundColor: alpha('#ff6b35', 0.15),
               color: '#ff6b35',
               fontWeight: 600,
+              border: `1px solid ${alpha('#ff6b35', 0.3)}`,
               '& .MuiChip-icon': {
                 color: '#ff6b35'
               }
@@ -89,68 +104,122 @@ const Header = () => {
           />
         </Box>
 
-        {/* Środkowa sekcja - Statystyki */}
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 3 }}>
-          <Stack direction="row" spacing={2}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                1,247
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Punkty
-              </Typography>
-            </Box>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.secondary.main }}>
-                Level 12
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Poziom
-              </Typography>
-            </Box>
-          </Stack>
+        {/* Środkowa sekcja - Minimalistyczny Pasek Poziomu */}
+        <Box sx={{ 
+          display: { xs: 'none', md: 'flex' }, 
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: 300,
+          mx: 2
+        }}>
+          {/* Kompaktowy Level Badge */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <Star sx={{ color: theme.palette.secondary.main, fontSize: 16 }} />
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                fontWeight: 700, 
+                color: theme.palette.secondary.main
+              }}
+            >
+              Level {currentLevel}
+            </Typography>
+          </Box>
+
+          {/* Minimalistyczny Progress Bar - BEZ KROPKI */}
+          <Box sx={{ width: '100%', mb: 0.5 }}>
+            <LinearProgress
+              variant="determinate"
+              value={xpProgress}
+              sx={{
+                height: 6,
+                borderRadius: 3,
+                backgroundColor: alpha(theme.palette.secondary.main, 0.2),
+                '& .MuiLinearProgress-bar': {
+                  background: `linear-gradient(90deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
+                  borderRadius: 3,
+                  // USUNIĘTO KROPKĘ I SHIMMER EFFECT
+                }
+              }}
+            />
+          </Box>
+          
+          {/* Kompaktowy XP Counter */}
+          <Typography variant="caption" sx={{ 
+            fontWeight: 600, 
+            color: theme.palette.text.secondary,
+            fontSize: '0.7rem'
+          }}>
+            {currentXP.toLocaleString()} / {nextLevelXP.toLocaleString()} XP
+          </Typography>
         </Box>
 
-        {/* Prawa sekcja - Akcje użytkownika */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        {/* Prawa sekcja - Minimalistyczne Akcje */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <ThemeToggle />
           
-          <IconButton 
-            sx={{ 
-              color: theme.palette.text.primary,
-              '&:hover': {
-                backgroundColor: alpha(theme.palette.primary.main, 0.1)
-              }
-            }}
-          >
-            <Notifications />
-          </IconButton>
+          <Tooltip title="Powiadomienia">
+            <IconButton 
+              size="small"
+              sx={{ 
+                color: theme.palette.text.primary,
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.1)
+                }
+              }}
+            >
+              <Notifications fontSize="small" />
+            </IconButton>
+          </Tooltip>
 
-          <IconButton 
-            sx={{ 
-              color: theme.palette.text.primary,
-              '&:hover': {
-                backgroundColor: alpha(theme.palette.primary.main, 0.1)
-              }
-            }}
-          >
-            <Settings />
-          </IconButton>
+          <Tooltip title="Ustawienia">
+            <IconButton 
+              size="small"
+              sx={{ 
+                color: theme.palette.text.primary,
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.1)
+                }
+              }}
+            >
+              <Settings fontSize="small" />
+            </IconButton>
+          </Tooltip>
 
-          <Avatar
-            sx={{
-              width: 40,
-              height: 40,
-              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-              cursor: 'pointer',
-              transition: 'transform 0.2s',
-              '&:hover': {
-                transform: 'scale(1.05)'
-              }
-            }}
-          >
-            <Person />
-          </Avatar>
+          <Tooltip title="Wyloguj się">
+            <IconButton 
+              size="small"
+              onClick={logout}
+              sx={{ 
+                color: theme.palette.text.primary,
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.error.main, 0.1),
+                  color: theme.palette.error.main
+                }
+              }}
+            >
+              <ExitToApp fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title={`${user?.firstName || 'Użytkownik'} ${user?.lastName || ''}`}>
+            <Avatar
+              onClick={() => navigate('/profile')}
+              sx={{
+                width: 32,
+                height: 32,
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                cursor: 'pointer',
+                transition: 'transform 0.2s',
+                fontSize: '0.9rem',
+                '&:hover': {
+                  transform: 'scale(1.05)'
+                }
+              }}
+            >
+              {user?.firstName ? user.firstName.charAt(0).toUpperCase() : <Person />}
+            </Avatar>
+          </Tooltip>
         </Box>
       </Toolbar>
     </AppBar>

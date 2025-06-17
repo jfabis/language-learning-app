@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Box, Typography, useTheme } from '@mui/material';
+import { Grid, Box, Typography, useTheme, Container } from '@mui/material';
 import {
   Star,
   TrendingUp,
@@ -16,7 +16,7 @@ const Dashboard = () => {
   const theme = useTheme();
 
   return (
-    <Box sx={{ flexGrow: 1, p: 3 }}>
+    <Container maxWidth="xl" sx={{ py: 3 }}>
       <Typography 
         variant="h4" 
         gutterBottom 
@@ -121,7 +121,7 @@ const Dashboard = () => {
           <RecentActivity />
         </Grid>
       </Grid>
-    </Box>
+    </Container>
   );
 };
 

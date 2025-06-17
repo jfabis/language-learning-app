@@ -28,11 +28,13 @@ import {
   ExpandMore
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Navigation = () => {
   const theme = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [languagesOpen, setLanguagesOpen] = useState(false);
 
   const drawerWidth = 280;
@@ -43,12 +45,13 @@ const Navigation = () => {
     { text: 'Quiz', icon: <Quiz />, path: '/quiz', color: theme.palette.warning.main },
     { text: 'Postępy', icon: <TrendingUp />, path: '/progress', color: theme.palette.info.main },
     { text: 'Osiągnięcia', icon: <EmojiEvents />, path: '/achievements', color: theme.palette.secondary.main },
+    { text: 'Profil', icon: <Person />, path: '/profile', color: theme.palette.text.primary }
   ];
 
-  const languages = [
-    { name: 'Angielski', flag: '🇺🇸', progress: 75, level: 'B2' },
-    { name: 'Hiszpański', flag: '🇪🇸', progress: 45, level: 'A2' },
-    { name: 'Francuski', flag: '🇫🇷', progress: 20, level: 'A1' },
+  const languages = user?.profile?.languages || [
+    { name: 'Angielski', flag: '🇺🇸', progress: 0, level: 'A1' },
+    { name: 'Hiszpański', flag: '🇪🇸', progress: 0, level: 'A1' },
+    { name: 'Francuski', flag: '🇫🇷', progress: 0, level: 'A1' },
   ];
 
   const handleLanguagesClick = () => {
@@ -67,6 +70,8 @@ const Navigation = () => {
           backgroundColor: theme.palette.background.paper,
           borderRight: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
           backgroundImage: 'none',
+          position: 'relative',
+          zIndex: 1200
         },
       }}
     >
@@ -79,60 +84,42 @@ const Navigation = () => {
             borderRadius: 3,
             background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)}, ${alpha(theme.palette.secondary.main, 0.1)})`,
             border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Box
-              sx={{
-                width: 50,
-                height: 50,
-                borderRadius: '50%',
-                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mr: 2
-              }}
-            >
+          <Box
+            sx={{
+              width: 50,
+              height: 50,
+              borderRadius: '50%',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            {user?.firstName ? (
+              <Typography sx={{ color: 'white', fontSize: 20, fontWeight: 700 }}>
+                {user.firstName.charAt(0).toUpperCase()}
+              </Typography>
+            ) : (
               <Person sx={{ color: 'white', fontSize: 24 }} />
-            </Box>
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Jasiek
-              </Typography>
-              <Chip
-                icon={<Star sx={{ fontSize: 16 }} />}
-                label="Premium"
-                size="small"
-                sx={{
-                  backgroundColor: alpha(theme.palette.warning.main, 0.2),
-                  color: theme.palette.warning.main,
-                  fontWeight: 600
-                }}
-              />
-            </Box>
+            )}
           </Box>
-          
-          <Box sx={{ mb: 1 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2" color="text.secondary">
-                Poziom 12
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                1,247 / 1,500 XP
-              </Typography>
-            </Box>
-            <LinearProgress
-              variant="determinate"
-              value={83}
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {user?.firstName || 'Użytkownik'} {user?.lastName || ''}
+            </Typography>
+            <Chip
+              icon={<Star sx={{ fontSize: 16 }} />}
+              label="Premium"
+              size="small"
               sx={{
-                height: 8,
-                borderRadius: 4,
-                backgroundColor: alpha(theme.palette.primary.main, 0.2),
-                '& .MuiLinearProgress-bar': {
-                  background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                  borderRadius: 4,
-                }
+                backgroundColor: alpha(theme.palette.warning.main, 0.2),
+                color: theme.palette.warning.main,
+                fontWeight: 600
               }}
             />
           </Box>
@@ -255,30 +242,6 @@ const Navigation = () => {
             ))}
           </List>
         </Collapse>
-
-        {/* Profil na dole */}
-        <Box sx={{ mt: 'auto', pt: 2 }}>
-          <ListItem disablePadding>
-            <ListItemButton
-              onClick={() => navigate('/profile')}
-              selected={location.pathname === '/profile'}
-              sx={{
-                borderRadius: 2,
-                '&.Mui-selected': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.15),
-                }
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <Person sx={{ fontSize: 22, color: theme.palette.text.secondary }} />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Profil"
-                primaryTypographyProps={{ fontWeight: 500, fontSize: '0.95rem' }}
-              />
-            </ListItemButton>
-          </ListItem>
-        </Box>
       </Box>
     </Drawer>
   );
