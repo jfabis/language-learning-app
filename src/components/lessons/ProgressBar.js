@@ -91,7 +91,7 @@ const ProgressBar = ({
                   color: isLocked 
                     ? theme.palette.text.secondary
                     : isCompleted 
-                      ? '#ffffff'  // Zmiana z 'white' na '#ffffff'
+                      ? '#ffffff'
                       : selectedColor,
                   transition: 'all 0.3s ease',
                   boxShadow: isCompleted && !isLocked
@@ -177,70 +177,20 @@ const ProgressBar = ({
         </Box>
       )}
 
-      {/* Progress Bar */}
-      <Box sx={{ position: 'relative' }}>
-        <LinearProgress
-          variant="determinate"
-          value={percentage}
-          sx={{
-            height: getHeight(),
+      {/* Progress Bar - PROSTY BEZ EFEKTÓW */}
+      <LinearProgress
+        variant="determinate"
+        value={percentage}
+        sx={{
+          height: getHeight(),
+          borderRadius: getHeight() / 2,
+          backgroundColor: alpha(selectedColor, 0.2),
+          '& .MuiLinearProgress-bar': {
+            background: `linear-gradient(90deg, ${selectedColor}, ${alpha(selectedColor, 0.8)})`,
             borderRadius: getHeight() / 2,
-            backgroundColor: alpha(selectedColor, 0.1),
-            '& .MuiLinearProgress-bar': {
-              background: `linear-gradient(90deg, ${selectedColor}, ${alpha(selectedColor, 0.8)})`,
-              borderRadius: getHeight() / 2,
-              transition: animated ? 'transform 1s ease-in-out' : 'none',
-              position: 'relative',
-              '&::after': animated ? {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: `linear-gradient(90deg, transparent, ${alpha('#ffffff', 0.3)}, transparent)`, // Zmiana z 'white' na '#ffffff'
-                animation: 'shimmer 2s infinite',
-                '@keyframes shimmer': {
-                  '0%': { transform: 'translateX(-100%)' },
-                  '100%': { transform: 'translateX(100%)' }
-                }
-              } : {}
-            }
-          }}
-        />
-
-        {/* Glow Effect */}
-        {animated && percentage > 0 && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: `${percentage}%`,
-              transform: 'translate(-50%, -50%)',
-              width: 12,
-              height: 12,
-              borderRadius: '50%',
-              backgroundColor: selectedColor,
-              boxShadow: `0 0 12px ${alpha(selectedColor, 0.6)}`,
-              animation: 'pulse 2s infinite',
-              '@keyframes pulse': {
-                '0%': {
-                  boxShadow: `0 0 12px ${alpha(selectedColor, 0.6)}`,
-                  transform: 'translate(-50%, -50%) scale(1)'
-                },
-                '50%': {
-                  boxShadow: `0 0 20px ${alpha(selectedColor, 0.8)}`,
-                  transform: 'translate(-50%, -50%) scale(1.2)'
-                },
-                '100%': {
-                  boxShadow: `0 0 12px ${alpha(selectedColor, 0.6)}`,
-                  transform: 'translate(-50%, -50%) scale(1)'
-                }
-              }
-            }}
-          />
-        )}
-      </Box>
+          }
+        }}
+      />
 
       {/* Steps */}
       {renderSteps()}

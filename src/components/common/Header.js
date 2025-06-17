@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -10,7 +10,12 @@ import {
   useTheme,
   alpha,
   Tooltip,
-  LinearProgress
+  LinearProgress,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Divider
 } from '@mui/material';
 import {
   School,
@@ -19,7 +24,12 @@ import {
   Person,
   LocalFireDepartment,
   ExitToApp,
-  Star
+  Star,
+  AccountCircle,
+  Palette,
+  VolumeUp,
+  Help,
+  Logout
 } from '@mui/icons-material';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from '../../contexts/AuthContext';
@@ -29,6 +39,7 @@ const Header = () => {
   const theme = useTheme();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [settingsAnchor, setSettingsAnchor] = useState(null);
 
   // Dane użytkownika z wartościami domyślnymi
   const currentLevel = 12;
@@ -36,6 +47,15 @@ const Header = () => {
   const nextLevelXP = 1500;
   const streakDays = 7;
   const xpProgress = (currentXP / nextLevelXP) * 100;
+
+  const handleSettingsClose = () => {
+    setSettingsAnchor(null);
+  };
+
+  const handleLogout = () => {
+    logout();
+    handleSettingsClose();
+  };
 
   return (
     <AppBar 
@@ -49,7 +69,7 @@ const Header = () => {
         boxShadow: theme.palette.mode === 'dark' 
           ? '0 4px 20px rgba(0, 0, 0, 0.3)' 
           : '0 4px 20px rgba(0, 0, 0, 0.08)',
-        zIndex: 1300 // Wyższy z-index niż navigation
+        zIndex: 1300
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between', py: 1, minHeight: '64px !important' }}>
@@ -138,7 +158,6 @@ const Header = () => {
                 '& .MuiLinearProgress-bar': {
                   background: `linear-gradient(90deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
                   borderRadius: 3,
-                  // USUNIĘTO KROPKĘ I SHIMMER EFFECT
                 }
               }}
             />
@@ -175,6 +194,7 @@ const Header = () => {
           <Tooltip title="Ustawienia">
             <IconButton 
               size="small"
+              onClick={(e) => setSettingsAnchor(e.currentTarget)}
               sx={{ 
                 color: theme.palette.text.primary,
                 '&:hover': {
@@ -222,6 +242,52 @@ const Header = () => {
           </Tooltip>
         </Box>
       </Toolbar>
+
+      {/* Proste Settings Menu */}
+      <Menu
+        anchorEl={settingsAnchor}
+        open={Boolean(settingsAnchor)}
+        onClose={handleSettingsClose}
+        PaperProps={{
+          sx: {
+            width: 200,
+            borderRadius: 2,
+          }
+        }}
+      >
+        <MenuItem onClick={() => { navigate('/profile'); handleSettingsClose(); }}>
+          <ListItemIcon>
+            <AccountCircle />
+          </ListItemIcon>
+          <ListItemText primary="Profil" />
+        </MenuItem>
+        <MenuItem onClick={handleSettingsClose}>
+          <ListItemIcon>
+            <Palette />
+          </ListItemIcon>
+          <ListItemText primary="Wygląd" />
+        </MenuItem>
+        <MenuItem onClick={handleSettingsClose}>
+          <ListItemIcon>
+            <VolumeUp />
+          </ListItemIcon>
+          <ListItemText primary="Dźwięk" />
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleSettingsClose}>
+          <ListItemIcon>
+            <Help />
+          </ListItemIcon>
+          <ListItemText primary="Pomoc" />
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleLogout} sx={{ color: theme.palette.error.main }}>
+          <ListItemIcon sx={{ color: theme.palette.error.main }}>
+            <Logout />
+          </ListItemIcon>
+          <ListItemText primary="Wyloguj się" />
+        </MenuItem>
+      </Menu>
     </AppBar>
   );
 };

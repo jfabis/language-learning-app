@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -23,18 +23,20 @@ import {
   Headphones,
   Add
 } from '@mui/icons-material';
+import { useLocation } from 'react-router-dom';
 import LessonCard from '../components/lessons/LessonCard';
 import LessonContent from '../components/lessons/LessonContent';
 import ProgressBar from '../components/lessons/ProgressBar';
 
 const Lessons = () => {
   const theme = useTheme();
+  const location = useLocation();
   const [selectedTab, setSelectedTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [isLessonOpen, setIsLessonOpen] = useState(false);
 
-  // Przykładowe dane lekcji
+  // Przykładowe dane lekcji - ZSYNCHRONIZOWANE Z DASHBOARD
   const lessons = [
     {
       id: 1,
@@ -46,7 +48,8 @@ const Lessons = () => {
       points: 50,
       progress: 0,
       isFavorite: false,
-      language: 'Angielski'
+      language: 'Angielski',
+      isNext: true // Następna lekcja z Dashboard
     },
     {
       id: 2,
@@ -94,7 +97,8 @@ const Lessons = () => {
       points: 50,
       progress: 0,
       isFavorite: false,
-      language: 'Hiszpański'
+      language: 'Hiszpański',
+      isNext: true // Następna lekcja dla hiszpańskiego
     },
     {
       id: 6,
@@ -119,7 +123,8 @@ const Lessons = () => {
       progress: 0,
       isFavorite: false,
       language: 'Francuski',
-      locked: true
+      locked: true,
+      isNext: true // Następna lekcja dla francuskiego (ale zablokowana)
     },
     {
       id: 8,
@@ -151,6 +156,25 @@ const Lessons = () => {
     { label: 'Ekspert', locked: true }
   ];
 
+  // OBSŁUGA PRZEKIEROWANIA Z DASHBOARD
+  useEffect(() => {
+    if (location.state?.selectedLesson) {
+      const lesson = location.state.selectedLesson;
+      console.log('Opening lesson from Dashboard:', lesson);
+      handleStartLesson(lesson);
+      
+      // Wyczyść state żeby nie otwierało się ponownie
+      window.history.replaceState({}, document.title);
+    }
+    
+    // Obsługa filtrowania po języku z Dashboard
+    if (location.state?.selectedLanguage) {
+      const language = location.state.selectedLanguage;
+      console.log('Filtering by language:', language);
+      // Możesz dodać logikę filtrowania tutaj
+    }
+  }, [location.state]);
+
   const filteredLessons = lessons.filter(lesson => {
     const matchesTab = selectedTab === 0 || lesson.type === tabs[selectedTab].value;
     const matchesSearch = lesson.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -159,16 +183,20 @@ const Lessons = () => {
   });
 
   const handleStartLesson = (lesson) => {
+    console.log('Starting lesson:', lesson);
     setSelectedLesson(lesson);
     setIsLessonOpen(true);
   };
 
   const handleFavorite = (lessonId) => {
     console.log('Toggle favorite for lesson:', lessonId);
+    // Tutaj możesz dodać logikę zapisywania ulubionych do localStorage
   };
 
   const handleCompleteLesson = (lesson, answers) => {
     console.log('Lesson completed:', lesson, answers);
+    setIsLessonOpen(false);
+    // Tutaj możesz dodać logikę zapisywania postępu
   };
 
   const overallProgress = Math.round(

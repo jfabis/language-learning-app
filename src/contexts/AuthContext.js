@@ -14,21 +14,21 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Sprawdź czy użytkownik jest zalogowany przy starcie aplikacji
-  useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem('currentUser');
-      if (savedUser) {
-        const parsedUser = JSON.parse(savedUser);
-        setUser(parsedUser);
-      }
-    } catch (error) {
-      console.error('Error loading user from localStorage:', error);
-      localStorage.removeItem('currentUser');
-    } finally {
-      setIsLoading(false);
+// Sprawdź czy użytkownik jest zalogowany przy starcie aplikacji
+useEffect(() => {
+  try {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
     }
-  }, []);
+  } catch (error) {
+    console.error('Error loading user from localStorage:', error);
+    localStorage.removeItem('currentUser');
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
 
   // Funkcje do zarządzania użytkownikami
   const loadUsers = () => {
@@ -55,7 +55,6 @@ export const AuthProvider = ({ children }) => {
       const { username, email, password, firstName, lastName } = userData;
       const users = loadUsers();
 
-      // Sprawdź czy użytkownik już istnieje
       if (users.find(u => u.username === username)) {
         return { success: false, message: 'Użytkownik o takiej nazwie już istnieje' };
       }
@@ -64,27 +63,29 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: 'Użytkownik z tym emailem już istnieje' };
       }
 
-      // Utwórz nowego użytkownika
       const newUser = {
         id: Date.now().toString(),
         username,
         email,
-        password, // W prawdziwej aplikacji hasło powinno być zahashowane
+        password,
         firstName,
         lastName,
+        phone: '',
+        location: '',
+        bio: '',
         createdAt: new Date().toISOString(),
         profile: {
           avatar: null,
-          level: 1,
-          totalXP: 0,
-          streak: 0,
-          completedLessons: 0,
-          completedQuizzes: 0,
+          level: 12,
+          totalXP: 1247,
+          streak: 7,
+          completedLessons: 127,
+          completedQuizzes: 23,
           achievements: [],
           languages: [
-            { name: 'Angielski', progress: 0, level: 'A1' },
-            { name: 'Hiszpański', progress: 0, level: 'A1' },
-            { name: 'Francuski', progress: 0, level: 'A1' }
+            { name: 'Angielski', progress: 75, level: 'B2', flag: '🇺🇸' },
+            { name: 'Hiszpański', progress: 45, level: 'A2', flag: '🇪🇸' },
+            { name: 'Francuski', progress: 20, level: 'A1', flag: '🇫🇷' }
           ]
         }
       };
@@ -108,11 +109,11 @@ export const AuthProvider = ({ children }) => {
       );
 
       if (foundUser) {
-        // Usuń hasło z obiektu użytkownika przed zapisaniem
         const userWithoutPassword = { ...foundUser };
         delete userWithoutPassword.password;
         
         setUser(userWithoutPassword);
+        // ZAPISZ SESJĘ - ale będzie usunięta przy restarcie
         localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
         
         return { success: true, message: 'Logowanie zakończone sukcesem' };
@@ -129,7 +130,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('currentUser');
-    window.location.reload(); // Odśwież stronę po wylogowaniu
+    sessionStorage.removeItem('currentUser');
   };
 
   // Funkcja aktualizacji profilu użytkownika
@@ -158,32 +159,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Funkcja aktualizacji postępu
-  const updateProgress = (progressData) => {
-    try {
-      const users = loadUsers();
-      const userIndex = users.findIndex(u => u.id === user.id);
-      
-      if (userIndex !== -1) {
-        users[userIndex].profile = { ...users[userIndex].profile, ...progressData };
-        saveUsers(users);
-        
-        const updatedUser = { ...users[userIndex] };
-        delete updatedUser.password;
-        
-        setUser(updatedUser);
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-        
-        return { success: true };
-      }
-      
-      return { success: false };
-    } catch (error) {
-      console.error('Update progress error:', error);
-      return { success: false };
-    }
-  };
-
   const value = {
     user,
     isLoading,
@@ -191,7 +166,6 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
-    updateProgress,
     isAuthenticated: !!user
   };
 

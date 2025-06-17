@@ -13,7 +13,8 @@ import {
   LinearProgress,
   useTheme,
   alpha,
-  Collapse
+  Collapse,
+  Avatar
 } from '@mui/material';
 import {
   Dashboard,
@@ -25,7 +26,8 @@ import {
   Language,
   Star,
   ExpandLess,
-  ExpandMore
+  ExpandMore,
+  Flag
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -48,14 +50,76 @@ const Navigation = () => {
     { text: 'Profil', icon: <Person />, path: '/profile', color: theme.palette.text.primary }
   ];
 
-  const languages = user?.profile?.languages || [
-    { name: 'Angielski', flag: '🇺🇸', progress: 0, level: 'A1' },
-    { name: 'Hiszpański', flag: '🇪🇸', progress: 0, level: 'A1' },
-    { name: 'Francuski', flag: '🇫🇷', progress: 0, level: 'A1' },
+  // Profesjonalna lista języków z danymi
+  const languages = [
+    { 
+      name: 'Angielski', 
+      flag: '🇺🇸', 
+      progress: 75, 
+      level: 'B2',
+      color: theme.palette.primary.main,
+      lessonsCompleted: 90,
+      totalLessons: 120,
+      xp: 1247,
+      isActive: true
+    },
+    { 
+      name: 'Hiszpański', 
+      flag: '🇪🇸', 
+      progress: 45, 
+      level: 'A2',
+      color: theme.palette.warning.main,
+      lessonsCompleted: 36,
+      totalLessons: 80,
+      xp: 634,
+      isActive: true
+    },
+    { 
+      name: 'Francuski', 
+      flag: '🇫🇷', 
+      progress: 20, 
+      level: 'A1',
+      color: theme.palette.info.main,
+      lessonsCompleted: 12,
+      totalLessons: 60,
+      xp: 234,
+      isActive: true
+    },
+    { 
+      name: 'Niemiecki', 
+      flag: '🇩🇪', 
+      progress: 0, 
+      level: 'A1',
+      color: theme.palette.text.secondary,
+      lessonsCompleted: 0,
+      totalLessons: 50,
+      xp: 0,
+      isActive: false,
+      locked: true
+    },
+    { 
+      name: 'Włoski', 
+      flag: '🇮🇹', 
+      progress: 0, 
+      level: 'A1',
+      color: theme.palette.text.secondary,
+      lessonsCompleted: 0,
+      totalLessons: 45,
+      xp: 0,
+      isActive: false,
+      locked: true
+    }
   ];
 
   const handleLanguagesClick = () => {
     setLanguagesOpen(!languagesOpen);
+  };
+
+  const handleLanguageClick = (language) => {
+    if (!language.locked) {
+      // Przekieruj do lekcji danego języka
+      navigate(`/lessons?lang=${language.name.toLowerCase()}`);
+    }
   };
 
   return (
@@ -89,25 +153,17 @@ const Navigation = () => {
             gap: 2
           }}
         >
-          <Box
+          <Avatar
             sx={{
               width: 50,
               height: 50,
-              borderRadius: '50%',
               background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              fontSize: '1.2rem',
+              fontWeight: 700
             }}
           >
-            {user?.firstName ? (
-              <Typography sx={{ color: 'white', fontSize: 20, fontWeight: 700 }}>
-                {user.firstName.charAt(0).toUpperCase()}
-              </Typography>
-            ) : (
-              <Person sx={{ color: 'white', fontSize: 24 }} />
-            )}
-          </Box>
+            {user?.firstName ? user.firstName.charAt(0).toUpperCase() : 'U'}
+          </Avatar>
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
               {user?.firstName || 'Użytkownik'} {user?.lastName || ''}
@@ -175,72 +231,204 @@ const Navigation = () => {
 
         <Divider sx={{ my: 2, opacity: 0.3 }} />
 
-        {/* Sekcja języków */}
+        {/* Profesjonalna Sekcja Języków */}
         <ListItem disablePadding>
-          <ListItemButton onClick={handleLanguagesClick} sx={{ borderRadius: 2 }}>
+          <ListItemButton 
+            onClick={handleLanguagesClick} 
+            sx={{ 
+              borderRadius: 2,
+              '&:hover': {
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+              }
+            }}
+          >
             <ListItemIcon sx={{ minWidth: 40 }}>
-              <Language sx={{ fontSize: 22, color: theme.palette.text.secondary }} />
+              <Language sx={{ fontSize: 22, color: theme.palette.primary.main }} />
             </ListItemIcon>
             <ListItemText 
               primary="Moje języki"
-              primaryTypographyProps={{ fontWeight: 500, fontSize: '0.95rem' }}
+              primaryTypographyProps={{ 
+                fontWeight: 600, 
+                fontSize: '0.95rem',
+                color: theme.palette.primary.main
+              }}
             />
-            {languagesOpen ? <ExpandLess /> : <ExpandMore />}
+            {languagesOpen ? 
+              <ExpandLess sx={{ color: theme.palette.primary.main }} /> : 
+              <ExpandMore sx={{ color: theme.palette.primary.main }} />
+            }
           </ListItemButton>
         </ListItem>
 
         <Collapse in={languagesOpen} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding sx={{ pl: 2 }}>
-            {languages.map((lang) => (
+          <List component="div" disablePadding sx={{ pl: 1, mt: 1 }}>
+            {languages.map((lang, index) => (
               <ListItem key={lang.name} disablePadding sx={{ mb: 1 }}>
                 <Box
+                  onClick={() => handleLanguageClick(lang)}
                   sx={{
                     width: '100%',
-                    p: 2,
+                    p: 2.5,
                     borderRadius: 2,
-                    backgroundColor: alpha(theme.palette.background.default, 0.5),
-                    border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                    background: lang.locked 
+                      ? `linear-gradient(135deg, ${alpha(theme.palette.text.secondary, 0.05)}, ${alpha(theme.palette.text.secondary, 0.02)})`
+                      : `linear-gradient(135deg, ${alpha(lang.color, 0.1)}, ${alpha(lang.color, 0.05)})`,
+                    border: `1px solid ${alpha(lang.locked ? theme.palette.text.secondary : lang.color, 0.2)}`,
+                    cursor: lang.locked ? 'not-allowed' : 'pointer',
+                    opacity: lang.locked ? 0.6 : 1,
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&:hover': !lang.locked ? {
+                      backgroundColor: alpha(lang.color, 0.15),
+                      transform: 'translateX(4px)',
+                      boxShadow: `0 4px 12px ${alpha(lang.color, 0.2)}`,
+                    } : {}
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Typography sx={{ fontSize: 20, mr: 1 }}>{lang.flag}</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 500, flexGrow: 1 }}>
-                      {lang.name}
-                    </Typography>
-                    <Chip
-                      label={lang.level}
-                      size="small"
+                  {/* Gradient Overlay */}
+                  {!lang.locked && (
+                    <Box
                       sx={{
-                        backgroundColor: alpha(theme.palette.info.main, 0.2),
-                        color: theme.palette.info.main,
-                        fontWeight: 600,
-                        fontSize: '0.7rem'
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        width: 60,
+                        height: 60,
+                        background: `radial-gradient(circle, ${alpha(lang.color, 0.1)} 0%, transparent 70%)`,
+                        borderRadius: '50%',
+                        transform: 'translate(20px, -20px)',
                       }}
                     />
+                  )}
+
+                  {/* Header z flagą i nazwą */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5, position: 'relative', zIndex: 1 }}>
+                    <Typography sx={{ fontSize: 24, mr: 1.5 }}>{lang.flag}</Typography>
+                    <Box sx={{ flexGrow: 1 }}>
+                      <Typography variant="body1" sx={{ 
+                        fontWeight: 600, 
+                        color: lang.locked ? theme.palette.text.secondary : theme.palette.text.primary,
+                        mb: 0.5
+                      }}>
+                        {lang.name}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Chip
+                          label={lang.level}
+                          size="small"
+                          sx={{
+                            backgroundColor: alpha(lang.locked ? theme.palette.text.secondary : lang.color, 0.2),
+                            color: lang.locked ? theme.palette.text.secondary : lang.color,
+                            fontWeight: 600,
+                            fontSize: '0.7rem',
+                            height: 20
+                          }}
+                        />
+                        {lang.locked && (
+                          <Chip
+                            label="Zablokowany"
+                            size="small"
+                            sx={{
+                              backgroundColor: alpha(theme.palette.text.secondary, 0.2),
+                              color: theme.palette.text.secondary,
+                              fontWeight: 600,
+                              fontSize: '0.65rem',
+                              height: 20
+                            }}
+                          />
+                        )}
+                      </Box>
+                    </Box>
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+
+                  {/* Progress Bar */}
+                  <Box sx={{ mb: 1.5, position: 'relative', zIndex: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                        Postęp
+                      </Typography>
+                      <Typography variant="caption" sx={{ 
+                        fontWeight: 600, 
+                        color: lang.locked ? theme.palette.text.secondary : lang.color,
+                        fontSize: '0.75rem'
+                      }}>
+                        {lang.progress}%
+                      </Typography>
+                    </Box>
                     <LinearProgress
                       variant="determinate"
                       value={lang.progress}
                       sx={{
-                        flexGrow: 1,
                         height: 6,
                         borderRadius: 3,
-                        backgroundColor: alpha(theme.palette.text.secondary, 0.1),
+                        backgroundColor: alpha(lang.locked ? theme.palette.text.secondary : lang.color, 0.2),
                         '& .MuiLinearProgress-bar': {
-                          backgroundColor: theme.palette.success.main,
+                          backgroundColor: lang.locked ? theme.palette.text.secondary : lang.color,
                           borderRadius: 3,
                         }
                       }}
                     />
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-                      {lang.progress}%
-                    </Typography>
+                  </Box>
+
+                  {/* Stats */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                        Lekcje
+                      </Typography>
+                      <Typography variant="body2" sx={{ 
+                        fontWeight: 600, 
+                        fontSize: '0.8rem',
+                        color: lang.locked ? theme.palette.text.secondary : theme.palette.text.primary
+                      }}>
+                        {lang.lessonsCompleted}/{lang.totalLessons}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                        XP
+                      </Typography>
+                      <Typography variant="body2" sx={{ 
+                        fontWeight: 600, 
+                        fontSize: '0.8rem',
+                        color: lang.locked ? theme.palette.text.secondary : theme.palette.warning.main
+                      }}>
+                        {lang.xp.toLocaleString()}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
               </ListItem>
             ))}
           </List>
+
+          {/* Dodaj Nowy Język */}
+          <Box sx={{ px: 1, mt: 2 }}>
+            <ListItemButton
+              sx={{
+                borderRadius: 2,
+                border: `2px dashed ${alpha(theme.palette.primary.main, 0.3)}`,
+                backgroundColor: alpha(theme.palette.primary.main, 0.05),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                  borderColor: alpha(theme.palette.primary.main, 0.5),
+                }
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <Flag sx={{ fontSize: 20, color: theme.palette.primary.main }} />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Dodaj nowy język"
+                primaryTypographyProps={{ 
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  color: theme.palette.primary.main
+                }}
+              />
+            </ListItemButton>
+          </Box>
         </Collapse>
       </Box>
     </Drawer>
